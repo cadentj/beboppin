@@ -1,0 +1,5 @@
+.build/
+*.xcodeproj
+*.xcworkspace
+beboppin-sessions/
+.DS_Store
