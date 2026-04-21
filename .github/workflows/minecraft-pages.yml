@@ -46,10 +46,30 @@ jobs:
         working-directory: minecraft
         run: pnpm build:demo
 
+      - name: Package Pages site
+        run: |
+          rm -rf pages-site
+          mkdir -p pages-site/minecraft
+          cp -R minecraft/dist-demo/. pages-site/minecraft/
+          cat <<'EOF' > pages-site/index.html
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8" />
+              <title>Redirecting…</title>
+              <meta http-equiv="refresh" content="0; url=/beboppin/minecraft/" />
+              <link rel="canonical" href="https://cadentj.github.io/beboppin/minecraft/" />
+            </head>
+            <body>
+              <p><a href="/beboppin/minecraft/">Open the Minecraft demo</a></p>
+            </body>
+          </html>
+          EOF
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: minecraft/dist-demo
+          path: pages-site
 
   deploy:
     needs: build
