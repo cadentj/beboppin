@@ -5,4 +5,4 @@ if (!el) {
   throw new Error('missing #app')
 }
 
-mountFarm(el, { width: window.innerWidth, height: window.innerHeight })
+mountFarm(el)

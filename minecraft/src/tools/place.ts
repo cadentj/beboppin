@@ -44,10 +44,9 @@ export class PlaceTool implements Tool {
     }
     this.placeIndex = (this.placeIndex + 1) % this.placeableTypes.length;
     this.placeBlockType = this.placeableTypes[this.placeIndex]!;
-    this.refreshLabel();
   }
 
   private refreshLabel(): void {
-    this.label = `Place (${this.placeBlockType})`;
+    this.label = 'Place';
   }
 }

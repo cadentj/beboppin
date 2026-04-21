@@ -20,6 +20,7 @@ export interface MountFarmOptions {
 }
 
 const PLACEABLE_TYPES: BlockType[] = ['grass', 'dirt', 'stone', 'water', 'log', 'leaves', 'planks', 'sand'];
+const DEFAULT_SEED = 'e9vf0x';
 
 export function mountFarm(
   container: HTMLElement,
@@ -31,10 +32,11 @@ export function mountFarm(
   host.className = 'farm-root';
   host.style.position = 'relative';
   host.style.width = options.width ? `${options.width}px` : '100%';
-  host.style.height = options.height ? `${options.height}px` : '460px';
+  host.style.height = options.height ? `${options.height}px` : '100%';
   container.appendChild(host);
 
-  let world = createDefaultWorld();
+  let currentSeed = DEFAULT_SEED;
+  let world = createDefaultWorld(currentSeed);
   const animationSystem = new AnimationSystem();
   const reactors: Reactor[] = [];
   const clock = new Clock();
@@ -47,6 +49,16 @@ export function mountFarm(
   toolRegistry.setActive(destroyTool.id);
 
   const toolbar = createToolbar(host, toolRegistry);
+
+  const seedBadge = document.createElement('div');
+  seedBadge.className = 'farm-seed';
+  host.appendChild(seedBadge);
+
+  const renderSeed = (): void => {
+    seedBadge.innerHTML = `Seed: <span class="farm-seed__value">${currentSeed}</span>`;
+  };
+
+  renderSeed();
 
   let disposed = false;
   let frameId = 0;
@@ -192,8 +204,9 @@ export function mountFarm(
     regenerating = true;
     try {
       teardownWorld();
-      const seed = Math.random().toString(36).slice(2, 8);
-      Object.assign(world, createDefaultWorld(seed));
+      currentSeed = Math.random().toString(36).slice(2, 8);
+      Object.assign(world, createDefaultWorld(currentSeed));
+      renderSeed();
       buildWorld();
       await spawnMobs();
     } finally {
@@ -243,6 +256,7 @@ export function mountFarm(
       assets?.dispose();
       sceneBundle?.destroy();
       toolbar.destroy();
+      seedBadge.remove();
       shuffleButton.remove();
       if (host.parentElement === container) {
         container.removeChild(host);
