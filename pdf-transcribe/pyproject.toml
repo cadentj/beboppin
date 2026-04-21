@@ -1,0 +1,21 @@
+[project]
+name = "pdf-transcribe"
+version = "0.1.0"
+description = "Transcribe a PDF to LaTeX with Gemini, one page at a time."
+readme = "README.md"
+authors = [
+    { name = "cadentj", email = "caden.juang@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "google-genai>=1.40.0",
+    "pymupdf>=1.26.0",
+    "python-dotenv>=1.1.0",
+]
+
+[project.scripts]
+pdf-transcribe = "pdf_transcribe:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

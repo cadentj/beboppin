@@ -1,0 +1,6 @@
+.env
+
+*.pdf
+*.tex
+
+__pycache__/
