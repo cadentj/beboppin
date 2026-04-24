@@ -7,6 +7,11 @@
 		"nodejs_compat"
 	],
 	"workers_dev": true,
+	"assets": {
+		"directory": "./web/dist",
+		"binding": "ASSETS",
+		"not_found_handling": "single-page-application"
+	},
 	"d1_databases": [
 		{
 			"binding": "cc",

@@ -1,8 +1,8 @@
 import { createElevenLabs } from "@ai-sdk/elevenlabs";
 import { experimental_transcribe as transcribe } from "ai";
-import { renderViewer } from "./viewer";
 
 export type Env = {
+  ASSETS: Fetcher;
   cc: D1Database;
   TELEGRAM_BOT_TOKEN: string;
   TELEGRAM_WEBHOOK_SECRET_TOKEN?: string;
@@ -11,6 +11,9 @@ export type Env = {
   ELEVENLABS_MODEL_ID?: string;
   WEB_AUTH_TOKEN?: string;
 };
+
+export const TAGS = ["learning", "tools", "ideas", "people", "opportunities"] as const;
+export type Tag = (typeof TAGS)[number];
 
 type TelegramVoice = { file_id: string; duration?: number };
 type TelegramMessage = {
@@ -24,6 +27,7 @@ type TelegramMessage = {
 type TelegramUpdate = { message?: TelegramMessage; edited_message?: TelegramMessage };
 
 const URL_PATTERN = /https?:\/\/\S+/gi;
+const TAG_PATTERN = new RegExp(`#(${TAGS.join("|")})\\b`, "i");
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -33,13 +37,102 @@ export default {
       return handleWebhook(request, env);
     }
 
-    if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/links" || url.pathname === "/transcriptions")) {
-      return renderViewer(request, env);
+    if (url.pathname.startsWith("/api/")) {
+      return handleApi(request, env, url);
     }
 
-    return new Response("Not found", { status: 404 });
+    return env.ASSETS.fetch(request);
   },
 };
+
+async function handleApi(request: Request, env: Env, url: URL): Promise<Response> {
+  if (env.WEB_AUTH_TOKEN) {
+    const bearer = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") ?? url.searchParams.get("token") ?? "";
+    if (bearer !== env.WEB_AUTH_TOKEN) return json({ error: "unauthorized" }, 401);
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/links") {
+    const [local, curius] = await Promise.all([
+      env.cc
+        .prepare("SELECT id, url, tag, created_at FROM links ORDER BY created_at DESC LIMIT 500")
+        .all()
+        .then(({ results }) =>
+          (results ?? []).map((r: any) => ({
+            source: "local" as const,
+            id: r.id as number,
+            url: r.url as string,
+            tag: (r.tag ?? null) as string | null,
+            created_at: r.created_at as string,
+          })),
+        ),
+      fetchCuriusLinks(),
+    ]);
+    const links = [...local, ...curius].sort((a, b) =>
+      a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0,
+    );
+    return json({ links, tags: TAGS });
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/transcriptions") {
+    const { results } = await env.cc
+      .prepare("SELECT id, transcript, duration_seconds, created_at FROM transcriptions ORDER BY created_at DESC LIMIT 200")
+      .all();
+    return json({ transcriptions: results ?? [] });
+  }
+
+  const linkMatch = url.pathname.match(/^\/api\/links\/(\d+)$/);
+  if (linkMatch && request.method === "PATCH") {
+    return patchLink(request, env, Number(linkMatch[1]));
+  }
+
+  return json({ error: "not found" }, 404);
+}
+
+const CURIUS_USER_ID = "6562";
+
+type CuriusLink = {
+  source: "curius";
+  id: number;
+  url: string;
+  title: string | null;
+  snippet: string | null;
+  created_at: string;
+};
+
+async function fetchCuriusLinks(): Promise<CuriusLink[]> {
+  try {
+    const res = await fetch(`https://curius.app/api/users/${CURIUS_USER_ID}/links?page=0`);
+    if (!res.ok) return [];
+    const data = (await res.json()) as {
+      userSaved?: Array<{ id: number; link: string; title?: string | null; snippet?: string | null; createdDate: string }>;
+    };
+    return (data.userSaved ?? []).map((x) => ({
+      source: "curius",
+      id: x.id,
+      url: x.link,
+      title: x.title ?? null,
+      snippet: x.snippet ?? null,
+      created_at: x.createdDate,
+    }));
+  } catch (err) {
+    console.error("curius fetch failed", err);
+    return [];
+  }
+}
+
+async function patchLink(request: Request, env: Env, id: number): Promise<Response> {
+  const body = (await request.json().catch(() => null)) as { tag?: string | null } | null;
+  if (!body || body.tag === undefined) return json({ error: "bad request" }, 400);
+  if (body.tag !== null && !isTag(body.tag)) return json({ error: "invalid tag" }, 400);
+
+  const result = await env.cc
+    .prepare("UPDATE links SET tag = ? WHERE id = ?")
+    .bind(body.tag, id)
+    .run();
+
+  if (!result.success) return json({ error: "update failed" }, 500);
+  return new Response(null, { status: 204 });
+}
 
 async function handleWebhook(request: Request, env: Env): Promise<Response> {
   if (env.TELEGRAM_WEBHOOK_SECRET_TOKEN) {
@@ -85,11 +178,14 @@ async function processMessage(message: TelegramMessage, env: Env): Promise<void>
   const urls = [...new Set([...text.matchAll(URL_PATTERN)].map((m) => m[0].replace(/[.,;:!?)]+$/g, "")))];
   if (urls.length === 0) return;
 
-  const notes = text.replace(URL_PATTERN, "").trim();
+  const tagMatch = text.match(TAG_PATTERN);
+  const tag = tagMatch ? (tagMatch[1].toLowerCase() as Tag) : null;
+
   for (const url of urls) {
-    await env.cc.prepare("INSERT INTO links (url, notes) VALUES (?, ?)").bind(url, notes).run();
+    await env.cc.prepare("INSERT INTO links (url, tag) VALUES (?, ?)").bind(url, tag).run();
   }
-  await reply(env, chatId, `saved ${urls.length} link${urls.length === 1 ? "" : "s"}.`);
+  const tagNote = tag ? ` as #${tag}` : "";
+  await reply(env, chatId, `saved ${urls.length} link${urls.length === 1 ? "" : "s"}${tagNote}.`);
 }
 
 async function transcribeAudio(audio: ArrayBuffer, env: Env): Promise<string> {
@@ -132,4 +228,12 @@ async function telegramApi<T = unknown>(env: Env, method: string, payload: Recor
 
 function truncate(value: string, max: number): string {
   return value.length <= max ? value : `${value.slice(0, max - 3)}...`;
+}
+
+function isTag(value: unknown): value is Tag {
+  return typeof value === "string" && (TAGS as readonly string[]).includes(value);
+}
+
+function json(value: unknown, status = 200): Response {
+  return new Response(JSON.stringify(value), { status, headers: { "Content-Type": "application/json" } });
 }
