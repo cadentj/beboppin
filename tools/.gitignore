@@ -1,0 +1,19 @@
+# Credentials
+
+# Google API credentials
+credentials.json
+token.json
+
+# Environment variables
+.env
+
+# Python
+
+__pycache__/
+
+# JS/TS
+
+node_modules/
+dist/
+
+.DS_Store

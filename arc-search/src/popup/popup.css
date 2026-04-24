@@ -1,0 +1,16 @@
+@import "tailwindcss" source(none);
+
+@source "./App.tsx";
+@source "./main.tsx";
+
+@layer components {
+  /* SortableJS adds this class at runtime — not present in static HTML */
+  .priority li.sortable-ghost {
+    opacity: 0.45;
+  }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+  }
+}

@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/* Scan this file’s sibling for utility classes used in the content script */
+@source "./main.tsx";
+@source "./Palette.tsx";
+@source "./ResultRow.tsx";
+
+@layer components {
+  :host {
+    all: initial;
+    font-family:
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+  }
+
+  :host *,
+  :host *::before,
+  :host *::after {
+    box-sizing: border-box;
+  }
+
+  .list-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .list-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}

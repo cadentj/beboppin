@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tools"
+version = "0.1.0"
+description = "Various tools for agent use."
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2",
+    "google-api-python-client>=2.190.0",
+    "google-auth-httplib2>=0.3.0",
+    "google-auth-oauthlib>=1.2.4",
+    "typer>=0.12.0",
+]
+
+[project.scripts]
+cf-cron = "tools.cf_cron.cli:main"
+docs = "tools.docs.cli:main"
+calendar = "tools.calendar.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["tools"]
