@@ -1,0 +1,30 @@
+{
+  "name": "cc",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply cc --local",
+    "db:migrate": "wrangler d1 migrations apply cc --remote",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.29.3",
+  "dependencies": {
+    "@ai-sdk/openai": "3.0.53",
+    "@chat-adapter/telegram": "4.26.0",
+    "ai": "6.0.168",
+    "chat": "4.26.0",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20260424.1",
+    "typescript": "6.0.3",
+    "wrangler": "4.84.1"
+  }
+}
