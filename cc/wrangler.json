@@ -1,26 +1,18 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "cc",
-  "main": "src/index.ts",
-  "compatibility_date": "2026-04-24",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
-  "workers_dev": true,
-  "vars": {
-    "TIMEZONE": "America/New_York"
-  },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "cc",
-      "database_id": "00000000-0000-0000-0000-000000000000"
-    }
-  ],
-  "triggers": {
-    "crons": [
-      "30 13 * * *",
-      "0 */3 * * *"
-    ]
-  }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "cc",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-04-24",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"workers_dev": true,
+	"d1_databases": [
+		{
+			"binding": "cc",
+			"database_name": "cc",
+			"database_id": "2278d93c-d61d-45b3-ac8b-d54f42de4114",
+			"remote": true
+		}
+	]
 }
