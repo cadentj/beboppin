@@ -52,7 +52,7 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   }
 
   if (request.method === "GET" && url.pathname === "/api/links") {
-    const [local, curius] = await Promise.all([
+    const [local, curius, thoughts] = await Promise.all([
       env.cc
         .prepare("SELECT id, url, tag, created_at FROM links ORDER BY created_at DESC LIMIT 500")
         .all()
@@ -66,8 +66,19 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
           })),
         ),
       fetchCuriusLinks(),
+      env.cc
+        .prepare("SELECT id, content, created_at FROM thoughts ORDER BY created_at DESC LIMIT 500")
+        .all()
+        .then(({ results }) =>
+          (results ?? []).map((r: any) => ({
+            source: "thought" as const,
+            id: r.id as number,
+            content: r.content as string,
+            created_at: r.created_at as string,
+          })),
+        ),
     ]);
-    const links = [...local, ...curius].sort((a, b) =>
+    const links = [...local, ...curius, ...thoughts].sort((a, b) =>
       a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0,
     );
     return json({ links, tags: TAGS });
@@ -182,7 +193,11 @@ async function processMessage(message: TelegramMessage, env: Env): Promise<void>
   if (!text) return;
 
   const urls = [...new Set([...text.matchAll(URL_PATTERN)].map((m) => m[0].replace(/[.,;:!?)]+$/g, "")))];
-  if (urls.length === 0) return;
+  if (urls.length === 0) {
+    await env.cc.prepare("INSERT INTO thoughts (content) VALUES (?)").bind(text).run();
+    await reply(env, chatId, "saved thought.");
+    return;
+  }
 
   const tagMatch = text.match(TAG_PATTERN);
   const tag = tagMatch ? (tagMatch[1].toLowerCase() as Tag) : null;

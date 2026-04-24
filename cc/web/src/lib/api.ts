@@ -35,7 +35,14 @@ export type CuriusLink = {
   created_at: string;
 };
 
-export type Link = LocalLink | CuriusLink;
+export type Thought = {
+  source: "thought";
+  id: number;
+  content: string;
+  created_at: string;
+};
+
+export type Link = LocalLink | CuriusLink | Thought;
 
 export type Transcription = {
   id: number;

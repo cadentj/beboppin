@@ -3,6 +3,7 @@
   import { fetchLinks, fetchTranscriptions, type Link, type Transcription } from "./lib/api";
   import LinkCard from "./lib/LinkCard.svelte";
   import CuriusLinkCard from "./lib/CuriusLinkCard.svelte";
+  import ThoughtCard from "./lib/ThoughtCard.svelte";
 
   type Tab = "links" | "transcriptions";
 
@@ -85,6 +86,8 @@
               {#each day.items as link (link.source + ":" + link.id)}
                 {#if link.source === "curius"}
                   <CuriusLinkCard {link} />
+                {:else if link.source === "thought"}
+                  <ThoughtCard thought={link} />
                 {:else}
                   <LinkCard {link} {tags} />
                 {/if}
