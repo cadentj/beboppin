@@ -3,3 +3,12 @@
   themes: dark --default;
   include: navbar, tab, badge, card, dropdown, menu, alert, link, loading, divider;
 }
+
+/* Safe area: Dynamic Island, home indicator, display corners (requires viewport-fit=cover). */
+.layout-root {
+  min-height: 100dvh;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+}

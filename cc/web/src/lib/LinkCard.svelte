@@ -1,5 +1,6 @@
 <script lang="ts">
   import { patchLink, type LocalLink } from "./api";
+  import { tagBadgeVariant } from "./tagStyles";
 
   let { link, tags }: { link: LocalLink; tags: string[] } = $props();
 
@@ -25,8 +26,7 @@
         <div
           tabindex="0"
           role="button"
-          class="badge badge-sm badge-ghost cursor-pointer"
-          class:badge-primary={link.tag}
+          class="badge badge-sm cursor-pointer {tagBadgeVariant(link.tag)}"
         >
           {link.tag ?? "—"}
         </div>
@@ -35,11 +35,15 @@
           class="menu dropdown-content z-1 mt-1 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-sm"
         >
           <li>
-            <button type="button" class="text-xs" onclick={() => setTag(null)}>—</button>
+            <button type="button" class="text-xs" onclick={() => setTag(null)}>
+              <span class="badge badge-xs badge-ghost">—</span>
+            </button>
           </li>
           {#each tags as t (t)}
             <li>
-              <button type="button" class="text-xs" onclick={() => setTag(t)}>{t}</button>
+              <button type="button" class="text-xs" onclick={() => setTag(t)}>
+                <span class="badge badge-xs {tagBadgeVariant(t)}">{t}</span>
+              </button>
             </li>
           {/each}
         </ul>

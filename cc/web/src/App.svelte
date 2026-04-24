@@ -55,7 +55,7 @@
   });
 </script>
 
-<div class="min-h-screen bg-base-200">
+<div class="layout-root bg-base-200">
   <div class="navbar bg-base-100 border-b border-base-300 justify-center">
     <!-- <div class="flex-1 px-2">
       <span class="text-xl font-semibold">cc</span>
