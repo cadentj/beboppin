@@ -25,14 +25,42 @@
       loading = false;
     }
   });
+
+  function dayKey(created: string): string {
+    const d = new Date(created);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+
+  function formatDayLabel(key: string): string {
+    const [y, mo, day] = key.split("-").map(Number);
+    return new Date(y, mo - 1, day).toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  const linksByDay = $derived.by(() => {
+    const map = new Map<string, Link[]>();
+    const order: string[] = [];
+    for (const link of links) {
+      const k = dayKey(link.created_at);
+      if (!map.has(k)) {
+        map.set(k, []);
+        order.push(k);
+      }
+      map.get(k)!.push(link);
+    }
+    return order.map((k) => ({ key: k, label: formatDayLabel(k), items: map.get(k)! }));
+  });
 </script>
 
 <div class="min-h-screen bg-base-200">
-  <div class="navbar bg-base-100 border-b border-base-300">
-    <div class="flex-1 px-2">
+  <div class="navbar bg-base-100 border-b border-base-300 justify-center">
+    <!-- <div class="flex-1 px-2">
       <span class="text-xl font-semibold">cc</span>
-    </div>
-    <div role="tablist" class="tabs tabs-box">
+    </div> -->
+    <div role="tablist" class="tabs tabs-box tabs-sm">
       <button role="tab" class="tab" class:tab-active={tab === "links"} onclick={() => (tab = "links")}>
         Links <span class="badge badge-sm ml-2">{links.length}</span>
       </button>
@@ -51,12 +79,19 @@
       {#if links.length === 0}
         <div class="text-center py-12 opacity-60">no links</div>
       {:else}
-        <div class="space-y-2">
-          {#each links as link (link.source + ":" + link.id)}
-            {#if link.source === "curius"}
-              <CuriusLinkCard {link} />
-            {:else}
-              <LinkCard {link} {tags} />
+        <div class="flex w-full flex-col">
+          {#each linksByDay as day, i (day.key)}
+            <div class="space-y-2">
+              {#each day.items as link (link.source + ":" + link.id)}
+                {#if link.source === "curius"}
+                  <CuriusLinkCard {link} />
+                {:else}
+                  <LinkCard {link} {tags} />
+                {/if}
+              {/each}
+            </div>
+            {#if i < linksByDay.length - 1}
+              <div class="divider">{linksByDay[i + 1].label}</div>
             {/if}
           {/each}
         </div>

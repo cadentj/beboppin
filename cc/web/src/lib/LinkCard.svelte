@@ -5,9 +5,7 @@
 
   let saving = $state<"idle" | "saving" | "error">("idle");
 
-  async function onTagChange(e: Event) {
-    const value = (e.target as HTMLSelectElement).value;
-    const next = value === "" ? null : value;
+  async function setTag(next: string | null) {
     saving = "saving";
     try {
       await patchLink(link.id, { tag: next });
@@ -16,23 +14,36 @@
     } catch {
       saving = "error";
     }
+    (document.activeElement as HTMLElement | null)?.blur?.();
   }
 </script>
 
 <div class="card bg-base-100 border border-base-300">
   <div class="card-body p-3 gap-2">
     <div class="flex items-center gap-2 flex-wrap">
-      <select
-        class="select select-xs select-bordered"
-        class:select-primary={link.tag}
-        value={link.tag ?? ""}
-        onchange={onTagChange}
-      >
-        <option value="">—</option>
-        {#each tags as t (t)}
-          <option value={t}>{t}</option>
-        {/each}
-      </select>
+      <div class="dropdown dropdown-start">
+        <div
+          tabindex="0"
+          role="button"
+          class="badge badge-sm badge-ghost cursor-pointer"
+          class:badge-primary={link.tag}
+        >
+          {link.tag ?? "—"}
+        </div>
+        <ul
+          tabindex="-1"
+          class="menu dropdown-content z-1 mt-1 w-52 rounded-box border border-base-300 bg-base-100 p-2 shadow-sm"
+        >
+          <li>
+            <button type="button" class="text-xs" onclick={() => setTag(null)}>—</button>
+          </li>
+          {#each tags as t (t)}
+            <li>
+              <button type="button" class="text-xs" onclick={() => setTag(t)}>{t}</button>
+            </li>
+          {/each}
+        </ul>
+      </div>
       <a href={link.url} target="_blank" rel="noreferrer" class="link link-primary flex-1 min-w-0 truncate">
         {link.url}
       </a>
