@@ -1,12 +1,9 @@
 const TOKEN_KEY = "cc_token";
 
 function readToken(): string {
-  const url = new URL(window.location.href);
-  const fromUrl = url.searchParams.get("token");
+  const fromUrl = new URL(window.location.href).searchParams.get("token");
   if (fromUrl) {
     localStorage.setItem(TOKEN_KEY, fromUrl);
-    url.searchParams.delete("token");
-    window.history.replaceState({}, "", url.toString());
     return fromUrl;
   }
   return localStorage.getItem(TOKEN_KEY) ?? "";
