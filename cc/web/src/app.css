@@ -1,4 +1,5 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: light --default, dark --prefersdark;
+  themes: dark --default;
+  include: navbar, tab, badge, card, select, alert, link, loading;
 }

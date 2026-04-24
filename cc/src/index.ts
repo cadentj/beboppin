@@ -1,4 +1,4 @@
-import { createElevenLabs } from "@ai-sdk/elevenlabs";
+import { createOpenAI } from "@ai-sdk/openai";
 import { experimental_transcribe as transcribe } from "ai";
 
 export type Env = {
@@ -7,8 +7,8 @@ export type Env = {
   TELEGRAM_BOT_TOKEN: string;
   TELEGRAM_WEBHOOK_SECRET_TOKEN?: string;
   TELEGRAM_ALLOWED_CHAT_ID: string;
-  ELEVENLABS_API_KEY: string;
-  ELEVENLABS_MODEL_ID?: string;
+  OPENAI_API_KEY: string;
+  OPENAI_TRANSCRIBE_MODEL?: string;
   WEB_AUTH_TOKEN?: string;
 };
 
@@ -152,7 +152,13 @@ async function handleWebhook(request: Request, env: Env): Promise<Response> {
   try {
     await processMessage(message, env);
   } catch (err) {
-    await reply(env, chatId, `error: ${(err as Error).message}`);
+    const e = err as Error & { cause?: unknown; status?: number; responseBody?: string };
+    console.error("processMessage failed", e, e.cause);
+    const parts = [`error: ${e.message}`];
+    if (e.status) parts.push(`status=${e.status}`);
+    if (e.responseBody) parts.push(`body=${truncate(e.responseBody, 500)}`);
+    if (e.cause) parts.push(`cause=${truncate(String((e.cause as Error)?.message ?? e.cause), 300)}`);
+    await reply(env, chatId, parts.join("\n"));
   }
   return new Response("ok");
 }
@@ -189,9 +195,10 @@ async function processMessage(message: TelegramMessage, env: Env): Promise<void>
 }
 
 async function transcribeAudio(audio: ArrayBuffer, env: Env): Promise<string> {
-  const elevenlabs = createElevenLabs({ apiKey: env.ELEVENLABS_API_KEY });
+  if (!env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not set");
+  const openai = createOpenAI({ apiKey: env.OPENAI_API_KEY });
   const result = await transcribe({
-    model: elevenlabs.transcription(env.ELEVENLABS_MODEL_ID ?? "scribe_v1"),
+    model: openai.transcription(env.OPENAI_TRANSCRIBE_MODEL ?? "gpt-4o-mini-transcribe"),
     audio: new Uint8Array(audio),
   });
   const text = result.text.trim();
