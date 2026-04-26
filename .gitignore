@@ -2,6 +2,7 @@
 
 *.pdf
 *.tex
+*.csv
 
 __pycache__/
 
@@ -9,3 +10,7 @@ node_modules/
 
 dist/
 .wrangler/
+
+.DS_Store
+
+*.png
