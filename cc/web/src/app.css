@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @plugin "daisyui" {
   themes: dark --default;
-  include: navbar, tab, badge, card, dropdown, menu, alert, link, loading, divider;
+  include: navbar, tab, badge, card, dropdown, menu, alert, link, loading, divider, btn;
 }
 
 /* Safe area: Dynamic Island, home indicator, display corners (requires viewport-fit=cover). */

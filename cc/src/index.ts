@@ -52,33 +52,23 @@ async function handleApi(request: Request, env: Env, url: URL): Promise<Response
   }
 
   if (request.method === "GET" && url.pathname === "/api/links") {
-    const [local, curius, thoughts] = await Promise.all([
+    const [local, curius] = await Promise.all([
       env.cc
-        .prepare("SELECT id, url, tag, created_at FROM links ORDER BY created_at DESC LIMIT 500")
+        .prepare("SELECT id, url, content, tag, created_at FROM links ORDER BY created_at DESC LIMIT 500")
         .all()
         .then(({ results }) =>
           (results ?? []).map((r: any) => ({
             source: "local" as const,
             id: r.id as number,
             url: r.url as string,
+            content: (r.content ?? r.url) as string,
             tag: (r.tag ?? null) as string | null,
             created_at: r.created_at as string,
           })),
         ),
       fetchCuriusLinks(),
-      env.cc
-        .prepare("SELECT id, content, created_at FROM thoughts ORDER BY created_at DESC LIMIT 500")
-        .all()
-        .then(({ results }) =>
-          (results ?? []).map((r: any) => ({
-            source: "thought" as const,
-            id: r.id as number,
-            content: r.content as string,
-            created_at: r.created_at as string,
-          })),
-        ),
     ]);
-    const links = [...local, ...curius, ...thoughts].sort((a, b) =>
+    const links = [...local, ...curius].sort((a, b) =>
       a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0,
     );
     return json({ links, tags: TAGS });
@@ -192,21 +182,25 @@ async function processMessage(message: TelegramMessage, env: Env): Promise<void>
 
   if (!text) return;
 
-  const urls = [...new Set([...text.matchAll(URL_PATTERN)].map((m) => m[0].replace(/[.,;:!?)]+$/g, "")))];
-  if (urls.length === 0) {
-    await env.cc.prepare("INSERT INTO thoughts (content) VALUES (?)").bind(text).run();
-    await reply(env, chatId, "saved thought.");
-    return;
-  }
+  const { content, firstUrl, tag } = parseSavedText(text);
 
+  await env.cc.prepare("INSERT INTO links (url, content, tag) VALUES (?, ?, ?)").bind(firstUrl ?? "", content, tag).run();
+  const tagNote = tag ? ` as #${tag}` : "";
+  await reply(env, chatId, `saved${tagNote}.`);
+}
+
+function parseSavedText(text: string): { content: string; firstUrl: string | null; tag: Tag | null } {
   const tagMatch = text.match(TAG_PATTERN);
   const tag = tagMatch ? (tagMatch[1].toLowerCase() as Tag) : null;
-
-  for (const url of urls) {
-    await env.cc.prepare("INSERT INTO links (url, tag) VALUES (?, ?)").bind(url, tag).run();
-  }
-  const tagNote = tag ? ` as #${tag}` : "";
-  await reply(env, chatId, `saved ${urls.length} link${urls.length === 1 ? "" : "s"}${tagNote}.`);
+  const content =
+    text
+      .replace(TAG_PATTERN, "")
+      .replace(/[ \t]+\n/g, "\n")
+      .replace(/\n[ \t]+/g, "\n")
+      .replace(/[ \t]{2,}/g, " ")
+      .trim() || text;
+  const firstUrl = [...content.matchAll(URL_PATTERN)][0]?.[0].replace(/[.,;:!?)]+$/g, "") ?? null;
+  return { content, firstUrl, tag };
 }
 
 async function transcribeAudio(audio: ArrayBuffer, env: Env): Promise<string> {

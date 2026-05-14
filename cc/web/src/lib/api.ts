@@ -19,6 +19,7 @@ export type LocalLink = {
   source: "local";
   id: number;
   url: string;
+  content: string;
   tag: string | null;
   created_at: string;
 };
@@ -32,14 +33,7 @@ export type CuriusLink = {
   created_at: string;
 };
 
-export type Thought = {
-  source: "thought";
-  id: number;
-  content: string;
-  created_at: string;
-};
-
-export type Link = LocalLink | CuriusLink | Thought;
+export type Link = LocalLink | CuriusLink;
 
 export type Transcription = {
   id: number;

@@ -1,0 +1,83 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font:
+    13px/1.45 ui-sans-serif,
+    system-ui,
+    sans-serif;
+  color: #e8eaed;
+  background: linear-gradient(to bottom right, #0f111a, #121826);
+}
+
+#root {
+  width: 320px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.clipper-popup-empty {
+  margin: 0;
+  padding: 16px;
+  color: rgba(232, 234, 237, 0.68);
+}
+
+.clipper-popup-section {
+  padding: 10px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.clipper-popup-section:first-of-type {
+  border-top: 0;
+}
+
+.clipper-popup-heading {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(232, 234, 237, 0.86);
+  word-break: break-all;
+}
+
+.clipper-popup-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clipper-popup-list li + li {
+  margin-top: 4px;
+}
+
+.clipper-popup-link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.clipper-popup-link:hover,
+.clipper-popup-link:focus-visible {
+  outline: none;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.clipper-popup-time {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffa45b;
+}
+
+.clipper-popup-note {
+  font-size: 11px;
+  color: rgba(232, 234, 237, 0.78);
+  word-break: break-word;
+}

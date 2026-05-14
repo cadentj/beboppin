@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Clipper",
+  "description": "Point-in-time bookmarks on YouTube with keyboard shortcuts.",
+  "version": "0.1.0",
+  "permissions": ["storage"],
+  "host_permissions": ["https://www.youtube.com/*"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

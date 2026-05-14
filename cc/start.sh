@@ -1,6 +1,12 @@
 # pnpm wrangler d1 create cc
 # pnpm db:migrate
 
+# pnpm typecheck
+# pnpm build:web
+
+# pnpm db:migrate
+# pnpm deploy
+
 pnpm wrangler secret put TELEGRAM_BOT_TOKEN
 pnpm wrangler secret put TELEGRAM_WEBHOOK_SECRET_TOKEN
 pnpm wrangler secret put TELEGRAM_ALLOWED_CHAT_ID
