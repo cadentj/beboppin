@@ -58,7 +58,7 @@ Since if v->len == v->cap when push is called, then + 1 means that the array isn
 
 In practice, this is fine because the array would just be resized an element early. But it's cleaner to resize when the array actually needs to be.
 */
-bool vec_int_push(Vec_int *v, int n) {
+int vec_int_push(Vec_int *v, int n) {
     // Assume that v->cap is never 0
 
     if (v->len == v->cap) { 
@@ -68,7 +68,7 @@ bool vec_int_push(Vec_int *v, int n) {
 
         // Check whether the realloc was valid
         if (!temp) {
-            return false;
+            return 1;
         }
 
         v->data = temp;
@@ -81,9 +81,15 @@ bool vec_int_push(Vec_int *v, int n) {
     v->data[v->len] = n;
     // Increment len
     v->len++;
-    return true;
+    return 0;
 }
 
+void vec_int_free(Vec_int *v) { 
+    free(v->data);
+    v->data = NULL;
+    v->len = 0;
+    v->cap = 0;
+}
 
 int main(void) {
     Vec_int v = vec_int_make(10);
@@ -92,8 +98,8 @@ int main(void) {
     }
 
     for (int i = 0; i < 20; i++) {
-        bool res = vec_int_push(&v, i);
-        if (!res) {
+        int res = vec_int_push(&v, i);
+        if (res == 1) {
             puts("BROKEN");
             free(v.data);
             return 1;
