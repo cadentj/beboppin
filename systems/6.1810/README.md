@@ -1,3 +1,5 @@
+Full course download here courtesy of Codex: https://drive.google.com/file/d/1dIUmvj5eXmo61ZZjBxh2wWXBWKeIpbp_/view?usp=sharing
+
 # 5/16
 
 ## HW 1
