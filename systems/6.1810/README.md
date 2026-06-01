@@ -102,3 +102,12 @@ But this makes 0 sense since there's no reason for `&status` to be the addr that
     - The child finishes and writes status to the addr that `wait()` calls
   - The kernel notifies it when the child exists and uses the data that the child process wrote
 
+
+# The C Programming Language
+
+## 5.1
+
+unary operators associate right to left, so: 
+
+`++*p` will increment whatever p points to, but `(*p)++` parenthesis are needed for order of operations for the right side `++`
+

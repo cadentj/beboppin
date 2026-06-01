@@ -57,9 +57,53 @@ main(int argc, char *argv[])
   exit(0);
 }
 
+
+
+int 
+step(char fmt, char *data) {
+
+
+  switch(fmt) {
+    case 'i': 
+      printf("%d\n", *(int *)data);
+      return sizeof(int);
+    case 'p': 
+      printf("%ld\n", *(long *)data);
+      return sizeof(long);
+    case 'h':
+      printf("%hd\n", *(short *)data);
+      return sizeof(short);
+    case 'c':
+      printf("%c\n", *data);
+      return sizeof(char);
+    case 's':
+      char *str = *(char **)data;
+
+      for(int i = 0; i < strlen(str); i++){
+        printf("%c", str[i]);
+      }
+      printf("\n");
+      return 8* sizeof(char);
+    case 'S': 
+      for(int i = 0; i < sizeof data; i++){
+        printf("%c", data[i]);
+      }
+      printf("\n");
+      return sizeof data;
+    default: 
+      printf("This should never happen\n");
+      return -1;
+  }
+
+}
+
+
 void
 memdump(char *fmt, char *data)
 {
-  // Your code here.
+  int pos = 0;
 
+  for(int i = 0; i < strlen(fmt); i++) {
+    pos += step(fmt[i], data + pos);
+  }
 }
