@@ -1,16 +1,10 @@
 Full course download here courtesy of Codex: https://drive.google.com/file/d/1dIUmvj5eXmo61ZZjBxh2wWXBWKeIpbp_/view?usp=sharing
 
-# 5/16
+# xv6 Book
 
-## HW 1
+## Chapter 1 of the xv6 Book
 
-https://github.com/mit-pdos/xv6-riscv/blob/riscv/user/cat.c
-
-How does the system keep track of the connection between the string filename argv[i] passed to open(), and the resulting integer file descriptor fd? What does the integer file descriptor number refer to?
-
-### Chapter 1 of the xv6 Book
-
-#### intro
+### intro
 
 - OS abstracts program design from hardware 
 - a *kernel* is a special program that provides services to running programs
@@ -30,7 +24,7 @@ this chapter details all the services provided by the xv6 kernel which are a sub
 a **shell** is an ordinary program that reads commands from the user and executes them. since it's a normal program in user space, there are many shell options in Unix. xv6 just uses an xv6 shell
 
 
-#### Processes and memory
+### Processes and memory
 
 ```c
 int pid = fork();
@@ -50,7 +44,28 @@ silly notes by me:
 - fork returns twice, on each process branch. it returns the other branch's process id. so it returns 0 on a child, and the pid of the child on the parent. 
 - wait will get the 
 
-####
+
+### Pipes
+
+
+
+# The C Programming Language
+
+## 5.1
+
+unary operators associate right to left, so: 
+
+`++*p` will increment whatever p points to, but `(*p)++` parenthesis are needed for order of operations for the right side `++`
+
+
+
+# Lesson 1
+
+## HW 1
+
+https://github.com/mit-pdos/xv6-riscv/blob/riscv/user/cat.c
+
+How does the system keep track of the connection between the string filename argv[i] passed to open(), and the resulting integer file descriptor fd? What does the integer file descriptor number refer to?
 
 ## Lecture 1
 
@@ -102,12 +117,36 @@ But this makes 0 sense since there's no reason for `&status` to be the addr that
     - The child finishes and writes status to the addr that `wait()` calls
   - The kernel notifies it when the child exists and uses the data that the child process wrote
 
+## Lab 1
 
-# The C Programming Language
+### memdump
 
-## 5.1
+this problem required me to know the data types, printf format specifiers, and some pointer rules.
 
-unary operators associate right to left, so: 
+Switch statements exist in c, i think there's some nuiance to what data types you can use in the statement though.
+```c
+switch(x) { 
+  case 1: 
+    break;
+  default:
+    break;
+}
+```
 
-`++*p` will increment whatever p points to, but `(*p)++` parenthesis are needed for order of operations for the right side `++`
+data types: 
+- `long` is 8 bytes --> `%ld`
+- `int` is 4 bytes --> `%d`
+- `short` is 2 bytes --> `%hd` (h is for half)
+- `char` is one byte --> `%c`
+
+you can also: 
+- print pointers --> `%p`
+- float --> `%f`
+  - double --> `%lf`
+- hex --> `%x`
+  - long hex --> `%lx`
+
+string stuff: 
+- you can't store string literals like `"hello"` on a `char`, but you can store them in a `char*` pointer. they are read only though. to get the length of the string at pointer, use the `strlen` method on the pointer.
+- you can also store strings as character arrays. you don't need to declare the length upfront, c will infer it. note, the length of the array will include the null pointer `\0`. even if you manually give a size since you don't initialize, you need to include space for the initializer, e.g. `chars[4] = "dog";`
 

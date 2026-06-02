@@ -68,10 +68,10 @@ step(char fmt, char *data) {
       printf("%d\n", *(int *)data);
       return sizeof(int);
     case 'p': 
-      printf("%ld\n", *(long *)data);
+      printf("%lx\n", *(long *)data);
       return sizeof(long);
     case 'h':
-      printf("%hd\n", *(short *)data);
+      printf("%d\n", *(short *)data);
       return sizeof(short);
     case 'c':
       printf("%c\n", *data);
@@ -83,7 +83,7 @@ step(char fmt, char *data) {
         printf("%c", str[i]);
       }
       printf("\n");
-      return 8* sizeof(char);
+      return 8 * sizeof(char);
     case 'S': 
       for(int i = 0; i < sizeof data; i++){
         printf("%c", data[i]);
