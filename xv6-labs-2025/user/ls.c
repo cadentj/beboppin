@@ -54,14 +54,23 @@ ls(char *path)
       printf("ls: path too long\n");
       break;
     }
+    // Copies the *characters* at *path into the buffer
     strcpy(buf, path);
+    // *p points to the memory address of the last char in path
     p = buf+strlen(buf);
+    // Set the value at the end of *p to "/" and then increment by one
     *p++ = '/';
+    // Read a directory entry into the struct de
     while(read(fd, &de, sizeof(de)) == sizeof(de)){
+      // inum == 1 means the dir slot is unused
       if(de.inum == 0)
         continue;
+      // Copy the entry name to the pointer. Names are fix char arrays size DIRSIZ
       memmove(p, de.name, DIRSIZ);
+      // Puts a null terminator `\0` at the end of *p
+      // longer names may not be terminated by a `\0`
       p[DIRSIZ] = 0;
+      // Uses the stat util to fstat from a path
       if(stat(buf, &st) < 0){
         printf("ls: cannot stat %s\n", buf);
         continue;

@@ -83,6 +83,10 @@ gets(char *buf, int max)
   return buf;
 }
 
+/*
+Heper to open provided path *n and read from 
+the corresponding file descriptor.
+*/
 int
 stat(const char *n, struct stat *st)
 {
@@ -108,6 +112,9 @@ atoi(const char *s)
   return n;
 }
 
+/*
+This function copies n bytes from dst to src.
+*/
 void*
 memmove(void *vdst, const void *vsrc, int n)
 {
@@ -118,6 +125,7 @@ memmove(void *vdst, const void *vsrc, int n)
   src = vsrc;
   if (src > dst) {
     while(n-- > 0)
+      // This line was a little confusing. It copies one byte from src to dst, then advances both pointers
       *dst++ = *src++;
   } else {
     dst += n;
