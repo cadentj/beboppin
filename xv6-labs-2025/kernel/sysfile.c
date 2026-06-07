@@ -438,13 +438,18 @@ sys_exec(void)
   int i;
   uint64 uargv, uarg;
 
+  // This pulls the nth system call from the trapframe as a pointer
   argaddr(1, &uargv);
+
   if(argstr(0, path, MAXPATH) < 0) {
     return -1;
   }
   memset(argv, 0, sizeof(argv));
   for(i=0;; i++){
+    // NOTE(cadetnj): I wonder why they use NELEM here rather than sizeof?
+    // Basically if i is out of bounds
     if(i >= NELEM(argv)){
+      // NOTE(cadentj): Haven't seen goto before!
       goto bad;
     }
     if(fetchaddr(uargv+sizeof(uint64)*i, (uint64*)&uarg) < 0){
